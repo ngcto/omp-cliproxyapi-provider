@@ -5,9 +5,12 @@ Native [oh-my-pi](https://omp.sh) extension that discovers models from [CLIProxy
 ## Install
 
 ```bash
-omp plugin link /absolute/path/to/omp-cliproxyapi-provider   # persistent
-omp -e /absolute/path/to/omp-cliproxyapi-provider/src/index.ts   # one run
+omp plugin install github:ngcto/omp-cliproxyapi-provider
 ```
+
+Pin a branch, tag or commit with `#<ref>` (e.g. `github:ngcto/omp-cliproxyapi-provider#main`). Update with `omp plugin install --force github:ngcto/omp-cliproxyapi-provider`, remove with `omp plugin uninstall omp-cliproxyapi-provider`.
+
+From a local checkout (development): `omp plugin link /absolute/path/to/omp-cliproxyapi-provider`, or load it for one run with `omp -e /absolute/path/to/omp-cliproxyapi-provider/src/index.ts`.
 
 ## Setup
 
