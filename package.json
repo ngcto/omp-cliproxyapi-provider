@@ -1,0 +1,24 @@
+{
+	"name": "omp-cliproxyapi-provider",
+	"version": "0.1.0",
+	"description": "Native oh-my-pi extension that discovers CLIProxyAPI models and registers them as a provider",
+	"type": "module",
+	"keywords": ["omp-extension", "oh-my-pi", "cliproxyapi"],
+	"license": "MIT",
+	"omp": {
+		"extensions": ["./src/index.ts"]
+	},
+	"files": ["src", "README.md", "LICENSE", "cliproxyapi.example.json"],
+	"scripts": {
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@oh-my-pi/pi-coding-agent": ">=18.5.1"
+	},
+	"devDependencies": {
+		"@oh-my-pi/pi-coding-agent": "18.5.1",
+		"@types/bun": "^1.4.2",
+		"typescript": "^7.0.2"
+	}
+}
