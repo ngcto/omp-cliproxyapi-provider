@@ -4,11 +4,14 @@
   "workspaces": {
     "": {
       "devDependencies": {
+        "@oh-my-pi/pi-ai": "18.5.1",
+        "@oh-my-pi/pi-catalog": "18.5.1",
         "@oh-my-pi/pi-coding-agent": "18.5.1",
         "@types/bun": "^1.4.2",
         "typescript": "^7.0.2",
       },
       "peerDependencies": {
+        "@oh-my-pi/pi-catalog": ">=18.5.1",
         "@oh-my-pi/pi-coding-agent": ">=18.5.1",
       },
     },

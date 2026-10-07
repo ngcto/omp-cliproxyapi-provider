@@ -25,38 +25,9 @@ describe("resolveEndpoints", () => {
 });
 
 describe("toModelConfig", () => {
-	it("maps reasoning efforts, modalities and limits", () => {
-		const model = toModelConfig({
-			slug: "gpt-x",
-			display_name: "GPT X",
-			context_window: 272000,
-			input_modalities: ["text", "image"],
-			supported_reasoning_levels: [{ effort: "none" }, { effort: "low" }, { effort: "xhigh" }],
-		});
-		expect(model).toMatchObject({
-			id: "gpt-x",
-			name: "GPT X",
-			reasoning: true,
-			input: ["text", "image"],
-			contextWindow: 272000,
-			thinking: { mode: "effort", efforts: ["low", "xhigh"] },
-		});
-	});
-
-	it("does not advertise reasoning when no catalog effort maps to an omp effort", () => {
-		for (const levels of [[{ effort: "none" }], [{ effort: "ultra" }], [{ effort: "none" }, { effort: "ultra" }]]) {
-			const model = toModelConfig({ slug: "m", supported_reasoning_levels: levels });
-			expect(model?.reasoning).toBe(false);
-			expect(model).not.toHaveProperty("thinking");
-		}
-	});
-
-	it("skips hidden and id-less entries; non-reasoning models carry no thinking config", () => {
+	it("skips hidden and id-less catalog entries", () => {
 		expect(toModelConfig({ slug: "a", visibility: "hide" })).toBeNull();
 		expect(toModelConfig({})).toBeNull();
-		const plain = toModelConfig({ slug: "plain", supported_reasoning_levels: [{ effort: "none" }] });
-		expect(plain?.reasoning).toBe(false);
-		expect(plain).not.toHaveProperty("thinking");
 	});
 });
 

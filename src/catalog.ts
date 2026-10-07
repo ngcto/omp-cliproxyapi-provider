@@ -2,6 +2,9 @@
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { THINKING_EFFORTS } from "@oh-my-pi/pi-catalog/effort";
+import { clampThinkingLevelForModel } from "@oh-my-pi/pi-catalog/model-thinking";
+import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import type { ProviderModelConfig } from "@oh-my-pi/pi-coding-agent";
 
 export const DEFAULT_PROVIDER_ID = "cliproxyapi";
@@ -31,6 +34,7 @@ export interface CodexClientModel {
 	max_output_tokens?: number;
 	input_modalities?: string[];
 	supported_reasoning_levels?: Array<{ effort?: string } | string>;
+	prefer_websockets?: boolean;
 	visibility?: string;
 }
 
@@ -98,9 +102,6 @@ export function resolveSettings(agentDir: string, env: NodeJS.ProcessEnv = proce
 	};
 }
 
-type Effort = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
-const EFFORTS: readonly Effort[] = ["minimal", "low", "medium", "high", "xhigh", "max"];
-
 function positive(value: unknown): number | undefined {
 	return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }
@@ -116,7 +117,7 @@ export function toModelConfig(model: CodexClientModel): ProviderModelConfig | nu
 		const level = (typeof entry === "string" ? entry : entry?.effort ?? "").trim().toLowerCase();
 		if (level) levels.add(level);
 	}
-	const efforts = EFFORTS.filter((effort) => levels.has(effort));
+	const efforts = THINKING_EFFORTS.filter((effort) => levels.has(effort));
 	// Reasoning is only advertised when omp can map at least one of the catalog's efforts;
 	// otherwise omp would invent a ladder the proxy never listed.
 	const reasoning = efforts.length > 0;
@@ -130,7 +131,19 @@ export function toModelConfig(model: CodexClientModel): ProviderModelConfig | nu
 		reasoning,
 		input,
 	};
-	if (reasoning) config.thinking = { mode: "effort", efforts };
+	if (reasoning) {
+		const thinking: NonNullable<ProviderModelConfig["thinking"]> = { mode: "effort", efforts };
+		const googleModel = getBundledModel("google", id);
+		// The proxy translates Gemini efforts to native thinkingLevel, not a reseller budget.
+		if (googleModel?.thinking?.mode === "google-level") {
+			for (const effort of efforts) {
+				const wireEffort = clampThinkingLevelForModel(googleModel, effort);
+				if (wireEffort && wireEffort !== effort) (thinking.effortMap ??= {})[effort] = wireEffort;
+			}
+		}
+		config.thinking = thinking;
+	}
+	if (typeof model.prefer_websockets === "boolean") config.preferWebsockets = model.prefer_websockets;
 	const contextWindow = positive(model.context_window) ?? positive(model.max_context_window);
 	if (contextWindow) config.contextWindow = contextWindow;
 	const maxTokens = positive(model.max_tokens) ?? positive(model.max_output_tokens);
